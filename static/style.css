@@ -6,3 +6,23 @@
 .card:hover {
   background-color: #f8f9fa;
 }
+.card:hover {
+  background-color: #f0f8ff;
+  transform: scale(1.02);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+  .visiting-card {
+    width: 10cm;
+    height: 5cm;
+    background-size: cover;
+    background-position: center;
+    color: white;
+    transition: 0.3s;
+    cursor: pointer;
+  }
+
+  .visiting-card h5,
+  .visiting-card a {
+    color: white;
+    text-shadow: 1px 1px 2px black;
+  }
