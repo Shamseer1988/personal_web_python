@@ -90,8 +90,8 @@ def frigate_export():
 
         except Exception as e:
             flash(f"Error: {str(e)}", "danger")
+    return redirect(url_for('dashboard'))
 
-    return render_template("dashboard.html")
 
 
 

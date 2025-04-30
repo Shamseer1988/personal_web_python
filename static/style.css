@@ -13,7 +13,7 @@
 }
   .visiting-card {
     width: 10cm;
-    height: 5cm;
+    height: 4cm;
     background-size: cover;
     background-position: center;
     color: white;
@@ -23,6 +23,6 @@
 
   .visiting-card h5,
   .visiting-card a {
-    color: white;
+    color: gray;
     text-shadow: 1px 1px 2px black;
   }
