@@ -26,3 +26,14 @@
     color: gray;
     text-shadow: 1px 1px 2px black;
   }
+
+
+/* *************************** For Light.html ************************88 */
+  .bg_image {
+        background: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #f8f9fa; /* fallback for slow load */
+    }
+
+
+

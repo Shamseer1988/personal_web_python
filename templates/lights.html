@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home Assistant Lights</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg_image">
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light shadow rounded">
+        <h2 class="mb-0">Lights Control</h2>
+        <div class="ms-auto">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-success me-2">DASHBOARD</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+        </div>
+    </div>
+</div>
+
+
+<div class="container mt-5">
+    <!--    <h1 class="text-white">Available Lights</h1>-->
+
+    <div class="row">
+        <!-- Left column: Lights display and filter -->
+        <div class="col-md-8">
+            <!-- Category Filter Buttons -->
+            <!-- Filter Buttons and Search Box in a Row -->
+            <div class="d-flex flex-wrap align-items-center mb-4">
+                <div class="d-flex flex-wrap">
+                    <button class="btn btn-primary filter-btn me-2 mb-2" data-filter="All">All</button>
+                    <button class="btn btn-primary filter-btn me-2 mb-2" data-filter="Outdoor">Outdoor</button>
+                    <button class="btn btn-primary filter-btn me-2 mb-2" data-filter="Dining Room">Dining Room</button>
+                    <button class="btn btn-primary filter-btn me-2 mb-2" data-filter="Master Bed">Master Bed</button>
+                    <button class="btn btn-primary filter-btn me-2 mb-2" data-filter="Kitchen">Kitchen</button>
+                    <button class="btn btn-primary filter-btn me-2 mb-2" data-filter="Sitout">Sitout</button>
+                </div>
+
+                <!-- Search Box aligned right -->
+                <div class="ms-auto">
+                    <input type="text" id="searchInput" class="form-control form-control-sm" style="min-width: 180px;"
+                           placeholder="Search...">
+                </div>
+            </div>
+
+
+            <!-- Light Cards -->
+            <div class="row" id="lightContainer">
+                {% for light in lights %}
+                <div class="col-md-4 mb-3 light-card" data-category="{{ light.friendly_name }}"
+                     data-state="{{ light.state }}">
+                    <div class="card shadow-sm fixed-card text-uppercase"
+                         style="background-color: rgba(255, 255,255, 0.9);">
+                        <div class="card-body">
+                            <h5 class="card-title light-name">{{ light.friendly_name }}</h5>
+                            <p>Status: <strong
+                                    class="light-state {% if light.state == 'on' %}text-success{% else %}text-muted{% endif %}">{{
+                                light.state }}</strong></p>
+
+                            <div class="form-check form-switch">
+                                <input class="form-check-input toggle-switch" type="checkbox"
+                                       role="switch"
+                                       data-id="{{ light.entity_id }}"
+                                       {% if light.state== 'on' %} checked {% endif %}>
+                                <label class="form-check-label"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+
+        </div>
+
+        <!-- Right column: Table and state filter -->
+        <div class="col-md-4 ">
+            <div class="mb-3 text-end ">
+                <button class="btn btn-dark state-filter-btn" data-state="all">ALL</button>
+                <button class="btn btn-success state-filter-btn" data-state="on">ON</button>
+                <button class="btn btn-warning state-filter-btn" data-state="off">OFF</button>
+                <button class="btn btn-secondary state-filter-btn" data-state="unavailable">UNAVAILABLE</button>
+            </div>
+
+            <h3 class="text-dark">Light States</h3>
+            <table class="table table-striped text-uppercase">
+                <thead>
+                <tr>
+                    <th>Friendly Name</th>
+                    <th>State</th>
+                </tr>
+                </thead>
+                <tbody id="stateTableBody">
+                {% for light in lights %}
+                <tr class="light-row" data-state="{{ light.state }}">
+                    <td>{{ light.friendly_name }}</td>
+                    <td class="light-state">{{ light.state }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+    <div id="toastMessage" class="toast align-items-center text-white bg-success border-0" role="alert"
+         aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="toastBody">
+                <!-- Message will appear here -->
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Show toast message
+    function showToast(message, type = 'success') {
+        const toastElement = document.getElementById('toastMessage');
+        const toastBody = document.getElementById('toastBody');
+
+        toastElement.className = `toast align-items-center text-white bg-${type} border-0`;
+        toastBody.textContent = message;
+
+        const toast = new bootstrap.Toast(toastElement, { delay: 2000 });
+        toast.show();
+    }
+
+    // Category filter
+    document.querySelectorAll('.filter-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const filterValue = this.getAttribute('data-filter').toLowerCase();
+            document.querySelectorAll('.light-card').forEach(card => {
+                const category = card.getAttribute('data-category').toLowerCase();
+                card.style.display = (filterValue === 'all' || category.includes(filterValue)) ? '' : 'none';
+            });
+        });
+    });
+
+    // State filter
+    document.querySelectorAll('.state-filter-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const stateValue = this.getAttribute('data-state').toLowerCase();
+            document.querySelectorAll('.light-card').forEach(card => {
+                const state = card.getAttribute('data-state').toLowerCase();
+                card.style.display = (stateValue === 'all' || state === stateValue) ? '' : 'none';
+            });
+            document.querySelectorAll('.light-row').forEach(row => {
+                const state = row.getAttribute('data-state').toLowerCase();
+                row.style.display = (stateValue === 'all' || state === stateValue) ? '' : 'none';
+            });
+        });
+    });
+
+    // Search filter
+    document.getElementById('searchInput').addEventListener('input', function () {
+        const searchValue = this.value.toLowerCase();
+        document.querySelectorAll('.light-card').forEach(card => {
+            const name = card.querySelector('.light-name').textContent.toLowerCase();
+            card.style.display = name.includes(searchValue) ? '' : 'none';
+        });
+        document.querySelectorAll('.light-row').forEach(row => {
+            const name = row.querySelector('td').textContent.toLowerCase();
+            row.style.display = name.includes(searchValue) ? '' : 'none';
+        });
+    });
+
+    // Toggle switch logic
+    document.querySelectorAll('.toggle-switch').forEach(switchElem => {
+        switchElem.addEventListener('change', () => {
+            const entityId = switchElem.getAttribute('data-id');
+
+            fetch('/lights/toggle_light', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ entity_id: entityId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const card = switchElem.closest('.light-card');
+                const stateElem = card.querySelector('.light-state');
+                const newState = switchElem.checked ? 'on' : 'off';
+
+                if (data.status !== 'success') {
+                    switchElem.checked = !switchElem.checked;
+                    showToast('Failed to toggle ' + entityId, 'danger');
+                } else {
+                    stateElem.textContent = newState;
+                    card.setAttribute('data-state', newState);
+
+                    document.querySelectorAll('#stateTableBody .light-row').forEach(row => {
+                        if (row.querySelector('td').textContent === card.querySelector('.light-name').textContent) {
+                            row.querySelector('.light-state').textContent = newState;
+                            row.setAttribute('data-state', newState);
+                        }
+                    });
+
+                    showToast(`${entityId} turned ${newState}`, 'success');
+                }
+            })
+            .catch(err => {
+                switchElem.checked = !switchElem.checked;
+                showToast('An error occurred while toggling the light', 'danger');
+                console.error(err);
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
